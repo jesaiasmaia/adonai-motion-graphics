@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>ADONAI · 06 Broadcast Pack</title>
+<style>
+  html,body{margin:0;height:100%;background:#07182D;overflow:hidden}
+  #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin-left:-960px;margin-top:-540px;transform-origin:center;background:#07182D}
+  .scene{position:absolute;inset:0;opacity:0;pointer-events:none}
+  #scenelabel{position:absolute;top:40px;left:0;right:0;text-align:center;font:500 19px 'Geist Mono';letter-spacing:.3em;color:#31DDD4;opacity:.35}
+
+  /* — cena A: lower third — */
+  #lt{position:absolute;left:8%;bottom:13%;display:flex;gap:0;will-change:transform,opacity;opacity:0}
+  #lt .accent{width:8px;background:#31DDD4;border-radius:4px 0 0 4px}
+  #lt .body{background:rgba(13,40,72,.94);border:1px solid rgba(49,221,212,.25);border-left:none;border-radius:0 14px 14px 0;padding:30px 44px 26px}
+  #lt .t1{font:800 56px/1.1 'Manrope';color:#EAF7F6}
+  #lt .t1 b{color:#31DDD4;font-weight:800}
+  #lt .t2{margin-top:10px;font:400 22px 'Geist Mono';letter-spacing:.18em;color:#78EEC7;opacity:.85}
+  #lt .rule{height:3px;background:linear-gradient(90deg,#31DDD4,transparent);margin-top:16px;width:0}
+
+  /* — cena B: badge — */
+  #badge{position:absolute;left:50%;top:50%;will-change:transform,opacity;opacity:0}
+  #badge .disc{width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;position:relative;
+               background:radial-gradient(circle at 50% 38%,#0D2848 0%,#07182D 78%);
+               border:1.5px solid rgba(49,221,212,.5);box-shadow:0 0 90px rgba(49,221,212,.16) inset,0 0 60px rgba(49,221,212,.12)}
+  #badge .ring{position:absolute;inset:-24px;border-radius:50%;border:1px dashed rgba(49,221,212,.35)}
+  #badge .mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-52%)}
+  #orbit{position:absolute;left:0;top:0;width:420px;height:420px}
+  #badge .dot{position:absolute;width:10px;height:10px;border-radius:50%;background:#FCBB00;left:50%;top:50%;margin:-5px 0 0 -5px;box-shadow:0 0 14px #FCBB00}
+  #badge .dot.b{background:#31DDD4;box-shadow:0 0 14px #31DDD4}
+
+  /* — cena C: stinger — */
+  #stinger{position:absolute;inset:0;overflow:hidden}
+  #panel{position:absolute;left:-9%;right:-9%;top:-9%;bottom:-9%;background:#31DDD4;transform:translateX(-103%) skewX(-6deg);will-change:transform}
+  #diamond{position:absolute;left:0;top:50%;width:210px;height:210px;margin-top:-105px;will-change:transform,opacity;opacity:0;filter:drop-shadow(0 26px 60px rgba(4,12,24,.5))}
+  #stingertitle{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;opacity:0}
+  #stingertitle h1{margin:0;font:600 170px/1 'Manrope';color:#07182D;letter-spacing:-0.02em}
+  #stingertitle p{margin:20px 0 0;font:600 26px 'Geist Mono';letter-spacing:.4em;color:#07182D;opacity:.8}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="scenelabel"></div>
+
+  <div class="scene" id="sceneA">
+    <div id="lt">
+      <div class="accent"></div>
+      <div class="body">
+        <div class="t1"><b>ADONAI</b> Genius Solutions</div>
+        <div class="t2">adonaitech.com.br · BARUERI — SP</div>
+        <div class="rule" id="ltrule"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene" id="sceneB">
+    <div id="badge">
+      <div class="disc">
+        <div class="ring"></div>
+        <div class="mark" id="bmark"></div>
+        <svg id="orbit" viewBox="0 0 420 420">
+          <defs><path id="cpath" d="M210 34 a176 176 0 1 1 -0.01 0"/></defs>
+          <text font-family="Geist Mono" font-size="21" letter-spacing="5" fill="#31DDD4" opacity=".85">
+            <textPath href="#cpath">SOFTWARE SOB MEDIDA • APPS • PAGAMENTOS • IA •</textPath>
+          </text>
+        </svg>
+        <div class="dot" id="d1"></div>
+        <div class="dot b" id="d2"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene" id="sceneC">
+    <div id="stinger">
+      <div id="panel"></div>
+      <div id="diamond"></div>
+      <div id="stingertitle">
+        <h1>ADONAI</h1>
+        <p>ADONAITECH.COM.BR</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="motion-core.js"></script>
+<script>
+const { lerp, seg, outExpo, outQuart, outQuint, inCubic, inOutCubic, outBack, C } = ADN;
+const stage = document.getElementById('stage');
+ADN.fitStage(stage);
+const tc = ADN.hud(stage, 'MG/06 — BROADCAST PACK');
+DUR = window.DUR = 10;
+window.ADN_PIECE = '06-broadcast';
+
+document.getElementById('bmark').innerHTML = ADN.logoSVG(150);
+document.getElementById('diamond').innerHTML = ADN.logoSVG(200);
+const label = document.getElementById('scenelabel');
+const sceneEls = { A: document.getElementById('sceneA'), B: document.getElementById('sceneB'), C: document.getElementById('sceneC') };
+const SCENES = [['A', 0.2, 3.4, '01 · LOWER THIRD'], ['B', 3.5, 6.8, '02 · BADGE ORBITAL'], ['C', 6.9, 10, '03 · STINGER WIPE']];
+
+function render(t) {
+  tc(t);
+  // cenas visíveis + label
+  let cur = null;
+  for (const [k, a, b, name] of SCENES) {
+    const on = t >= a && t < b;
+    sceneEls[k].style.opacity = on ? 1 : 0;
+    if (on) cur = name;
+  }
+  label.textContent = cur || '';
+
+  /* ——— A: lower third ——— */
+  const ain = outExpo(seg(t, 0.3, 0.95)), aout = inCubic(seg(t, 2.8, 3.3));
+  const lt = document.getElementById('lt');
+  lt.style.opacity = ain * (1 - aout);
+  lt.style.transform = `translateX(${lerp(-560, 0, ain) - aout * 620}px)`;
+  document.getElementById('ltrule').style.width = `${lerp(0, 420, outQuart(seg(t, 0.75, 1.35)))}px`;
+
+  /* ——— B: badge orbital ——— */
+  const bin = seg(t, 3.5, 4.12), bout = seg(t, 6.25, 6.75);
+  const badge = document.getElementById('badge');
+  badge.style.opacity = outExpo(bin) * (1 - inOutCubic(bout));
+  const bsc = lerp(0.3, 1, outBack(bin)) * lerp(1, 0.86, inOutCubic(bout));
+  badge.style.transform = `scale(${bsc})`;
+  const rot = (t - 3.5) * 34; // texto circular gira
+  document.getElementById('orbit').style.transform = `rotate(${rot}deg)`;
+  document.getElementById('d1').style.transform = `rotate(${rot * 1.6}deg) translateX(234px)`;
+  document.getElementById('d2').style.transform = `rotate(${-rot * 1.1 + 140}deg) translateX(234px)`;
+
+  /* ——— C: stinger ——— */
+  const spin = outCubic(seg(t, 6.9, 7.75));  // wipe in
+  const sout = inCubic(seg(t, 9.15, 9.75));  // wipe out
+  document.getElementById('panel').style.transform =
+    `translateX(${lerp(-103, 0, spin) - sout * 103}%) skewX(-6deg)`;
+  const dia = document.getElementById('diamond');
+  dia.style.opacity = spin > 0.02 && sout < 1 ? 1 : 0;
+  dia.style.transform = `translateX(${lerp(-260, 2160, spin) - sout * 400}px) rotate(${-7 + 5 * Math.sin(spin * Math.PI)}deg)`;
+  const tin = seg(t, 7.3, 7.8);
+  const st = document.getElementById('stingertitle');
+  st.style.opacity = outExpo(tin) * (1 - inCubic(seg(t, 9.1, 9.5)));
+  st.style.transform = `translateY(-50%) scale(${lerp(1.35, 1, outQuart(tin))})`;
+}
+</script>
+<script src="sound-engine.js"></script>
+<script src="audio.js"></script>
+</body>
+</html>

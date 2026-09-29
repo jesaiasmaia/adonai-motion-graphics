@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>ADONAI · 03 Circuit Pulse</title>
+<style>
+  html,body{margin:0;height:100%;background:#07182D;overflow:hidden}
+  #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin-left:-960px;margin-top:-540px;transform-origin:center;background:#07182D}
+  svg{position:absolute;inset:0}
+  #logo{position:absolute;left:960px;top:470px;transform:translate(-50%,-50%) scale(0);opacity:0;will-change:transform,opacity}
+  .wm{position:absolute;left:0;right:0;text-align:center;opacity:0}
+  #word{top:708px;font:600 92px/1 'Manrope';color:#FFFFFF;letter-spacing:-0.01em}
+  #tag{top:838px;font:400 24px 'Geist Mono';letter-spacing:.4em;color:#31DDD4}
+  #flash{position:absolute;left:960px;top:470px;width:900px;height:900px;transform:translate(-50%,-50%);
+         background:radial-gradient(circle,rgba(120,238,199,.5) 0%,rgba(49,221,212,.18) 35%,transparent 68%);opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="circ" width="1920" height="1080" viewBox="0 0 1920 1080" fill="none"></svg>
+  <div id="flash"></div>
+  <div id="logo"></div>
+  <div class="wm" id="word">ADONAI</div>
+  <div class="wm" id="tag">DO CONCEITO À ESCALA</div>
+</div>
+<script src="motion-core.js"></script>
+<script>
+const { lerp, seg, outExpo, outQuart, outCubic, outBack, rng, C } = ADN;
+const stage = document.getElementById('stage');
+ADN.fitStage(stage);
+const tc = ADN.hud(stage, 'MG/03 — CIRCUIT PULSE');
+DUR = window.DUR = 6;
+window.ADN_PIECE = '03-circuit';
+
+const CX = 960, CY = 470;
+const svg = document.getElementById('circ');
+const NS = 'http://www.w3.org/2000/svg';
+const rnd = rng(99);
+
+// rotas ortogonais das bordas → anel ao redor do logo (nunca cruzam o símbolo)
+const RING = 250;
+const routes = [];
+const edges = ['L', 'R', 'T', 'B', 'L', 'R', 'T', 'B', 'L', 'R', 'T', 'B'];
+for (let i = 0; i < 12; i++) {
+  const e = edges[i];
+  const th = (i / 12) * Math.PI * 2 + rnd() * 0.35;
+  const ax = CX + Math.cos(th) * RING, ay = CY + Math.sin(th) * RING;
+  let x, y;
+  if (e === 'L') { x = 0; y = 120 + rnd() * 840; }
+  if (e === 'R') { x = 1920; y = 120 + rnd() * 840; }
+  if (e === 'T') { x = 100 + rnd() * 1720; y = 0; }
+  if (e === 'B') { x = 100 + rnd() * 1720; y = 1080; }
+  const pts = [[x, y]];
+  if (e === 'L' || e === 'R') {
+    // vertical primeiro para alinhar com a altura do alvo, depois horizontal
+    pts.push([x, ay], [ax, ay]);
+  } else {
+    pts.push([ax, y], [ax, ay]);
+  }
+  routes.push({ pts, t0: 0.3 + i * 0.13 });
+}
+
+const paths = routes.map(r => {
+  const d = 'M' + r.pts.map(p => p.join(' ')).join(' L ');
+  const el = document.createElementNS(NS, 'path');
+  el.setAttribute('d', d);
+  el.setAttribute('stroke', C.teal); el.setAttribute('stroke-opacity', '0.3');
+  el.setAttribute('stroke-width', '2'); el.setAttribute('fill', 'none');
+  svg.appendChild(el);
+  const len = el.getTotalLength();
+  el.style.strokeDasharray = len;
+  el.style.strokeDashoffset = len;
+  // pad no ponto inicial (borda)
+  const pad0 = document.createElementNS(NS, 'circle');
+  pad0.setAttribute('cx', r.pts[0][0]); pad0.setAttribute('cy', r.pts[0][1]);
+  pad0.setAttribute('r', 5); pad0.setAttribute('fill', C.teal); pad0.setAttribute('opacity', 0);
+  svg.appendChild(pad0);
+  return { el, len, t0: r.t0, pad0 };
+});
+
+// anel hub tracejado em volta do logo (conecta os endpoints)
+const hub = document.createElementNS(NS, 'circle');
+hub.setAttribute('cx', CX); hub.setAttribute('cy', CY);
+hub.setAttribute('r', RING);
+hub.setAttribute('stroke', C.teal); hub.setAttribute('stroke-opacity', '0.35');
+hub.setAttribute('stroke-width', '1.5'); hub.setAttribute('fill', 'none');
+hub.setAttribute('stroke-dasharray', '4 11');
+svg.appendChild(hub);
+
+// anéis de choque
+const rings = [0, 1].map(i => {
+  const c = document.createElementNS(NS, 'circle');
+  c.setAttribute('cx', CX); c.setAttribute('cy', CY); c.setAttribute('r', 20);
+  c.setAttribute('stroke', C.teal); c.setAttribute('fill', 'none'); c.setAttribute('stroke-width', 2.5);
+  c.setAttribute('opacity', 0);
+  svg.appendChild(c);
+  return { el: c, t0: 3.28 + i * 0.22 };
+});
+
+document.getElementById('logo').innerHTML = ADN.logoSVG(240);
+
+function render(t) {
+  tc(t);
+  // limpa pulsos do frame anterior
+  svg.querySelectorAll('circle.pulse').forEach(c => c.remove());
+  // desenho das trilhas com stagger
+  for (const p of paths) {
+    const e = outCubic(seg(t, p.t0, p.t0 + 1.7));
+    p.el.style.strokeDashoffset = p.len * (1 - e);
+    p.pad0.setAttribute('opacity', e > 0.02 ? 0.55 : 0);
+    // pulso viajando na ponta do traço
+    if (e > 0.02 && e < 0.999) {
+      const pt = p.el.getPointAtLength(p.len * e);
+      const pulse = document.createElementNS(NS, 'circle');
+      pulse.setAttribute('class', 'pulse');
+      pulse.setAttribute('cx', pt.x); pulse.setAttribute('cy', pt.y);
+      pulse.setAttribute('r', 10); pulse.setAttribute('fill', 'rgba(190,255,245,.85)');
+      svg.appendChild(pulse);
+    }
+  }
+
+  // flash central
+  document.getElementById('flash').style.opacity =
+    Math.max(0, Math.sin(Math.PI * seg(t, 3.15, 3.62))) * 0.9;
+
+  // logo acende
+  const lp = seg(t, 3.2, 3.75);
+  const logo = document.getElementById('logo');
+  logo.style.opacity = outExpo(lp);
+  logo.style.transform = `translate(-50%,-50%) scale(${lerp(0.4, 1, outBack(lp))})`;
+  const beat = 0.5 + 0.5 * Math.sin(t * Math.PI * 2 * 1.6);
+  logo.style.filter = `drop-shadow(0 0 ${lerp(10, 34, beat)}px rgba(49,221,212,${lerp(0.25, 0.6, beat)}))`;
+
+  // anel hub gira e aparece no fim do desenho
+  hub.setAttribute('transform', `rotate(${t * 9} ${CX} ${CY})`);
+  hub.setAttribute('opacity', 0.8 * seg(t, 2.1, 2.8) * (1 - seg(t, 5.45, 6)));
+
+  // anéis
+  for (const r of rings) {
+    const p = outQuart(seg(t, r.t0, r.t0 + 1.1));
+    r.el.setAttribute('r', lerp(30, 420, p));
+    r.el.setAttribute('opacity', (1 - p) * 0.55 * (t > r.t0 ? 1 : 0));
+  }
+
+  // wordmark + tag
+  const wp = seg(t, 3.95, 4.6), we = outExpo(wp);
+  const w = document.getElementById('word');
+  w.style.opacity = we * (1 - seg(t, 5.55, 6));
+  w.style.transform = `translateY(${lerp(22, 0, we)}px)`;
+  const tg = document.getElementById('tag');
+  tg.style.opacity = outExpo(seg(t, 4.25, 4.9)) * (1 - seg(t, 5.55, 6));
+}
+</script>
+<script src="sound-engine.js"></script>
+<script src="audio.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>ADONAI · 04 Aurora Flow</title>
+<style>
+  html,body{margin:0;height:100%;background:#07182D;overflow:hidden}
+  #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin-left:-960px;margin-top:-540px;transform-origin:center;background:#07182D}
+  .blob{position:absolute;border-radius:50%;mix-blend-mode:screen;filter:blur(90px);will-change:transform}
+  #grain{position:absolute;inset:0;opacity:.06;pointer-events:none}
+  #card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);will-change:transform;
+        padding:64px 96px;border-radius:28px;background:rgba(255,255,255,.055);
+        border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+        text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.35)}
+  #card .mark{transform:translateY(-102px)}
+  #card h1{margin:6px 0 0;font:600 108px/1 'Manrope';color:#fff;letter-spacing:-0.02em}
+  #card .lock{margin:14px 0 0;font:500 21px 'Geist Mono';letter-spacing:.52em;text-indent:.52em;color:#31DDD4}
+  #card p{margin:22px 0 0;font:400 23px 'Geist Mono';letter-spacing:.3em;color:#78EEC7}
+  #vign{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(4,12,24,.55) 100%)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="blob" id="b1"></div>
+  <div class="blob" id="b2"></div>
+  <div class="blob" id="b3"></div>
+  <div class="blob" id="b4"></div>
+  <canvas id="grain" width="1920" height="1080"></canvas>
+  <div id="card">
+    <div class="mark" id="mark"></div>
+    <h1>ADONAI</h1>
+    <div class="lock">GENIUS SOLUTIONS</div>
+    <p>PRODUTOS DIGITAIS QUE MOVEM NEGÓCIOS</p>
+  </div>
+  <div id="vign"></div>
+</div>
+<script src="motion-core.js"></script>
+<script>
+const { TAU } = ADN;
+const stage = document.getElementById('stage');
+ADN.fitStage(stage);
+const tc = ADN.hud(stage, 'MG/04 — AURORA FLOW · LOOP 8S');
+DUR = window.DUR = 8;
+window.ADN_PIECE = '04-aurora';
+
+document.getElementById('mark').innerHTML = ADN.logoSVG(104);
+
+// grain estático (uma única pintura)
+(function () {
+  const g = document.getElementById('grain').getContext('2d');
+  const img = g.createImageData(1920, 1080);
+  const r = ADN.rng(5);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = r() * 255;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+    img.data[i + 3] = 26;
+  }
+  g.putImageData(img, 0, 0);
+})();
+
+const BLOBS = [
+  { el: 'b1', size: 760, color: 'rgba(49,221,212,.8)',     fx: 1, fy: 2, px: 0.0,  py: 1.7, ax: 330, ay: 250 },
+  { el: 'b2', size: 640, color: 'rgba(0,210,148,.55)',      fx: 1, fy: 1, px: 2.4,  py: 0.6, ax: 430, ay: 300 },
+  { el: 'b3', size: 860, color: 'rgba(36,84,230,.5)',       fx: 1, fy: 2, px: 3.1,  py: 2.9, ax: 470, ay: 330 },
+  { el: 'b4', size: 460, color: 'rgba(252,187,0,.22)',      fx: 2, fy: 1, px: 1.2,  py: 4.0, ax: 520, ay: 240 },
+];
+BLOBS.forEach(b => {
+  const e = document.getElementById(b.el);
+  e.style.width = e.style.height = b.size + 'px';
+  e.style.background = `radial-gradient(circle at 50% 50%, ${b.color}, transparent 70%)`;
+});
+
+function render(t) {
+  tc(t);
+  for (const b of BLOBS) {
+    // frequências inteiras sobre DUR=8s → loop perfeito
+    const x = 960 + b.ax * Math.sin(TAU * b.fx * t / 8 + b.px);
+    const y = 540 + b.ay * Math.sin(TAU * b.fy * t / 8 + b.py);
+    const e = document.getElementById(b.el);
+    e.style.transform = `translate(${x - b.size / 2}px,${y - b.size / 2}px) scale(${1 + 0.08 * Math.sin(TAU * b.fx * t / 8 + b.px + 1)})`;
+  }
+  const card = document.getElementById('card');
+  card.style.transform = `translate(-50%,-50%) translateY(${12 * Math.sin(TAU * t / 8)}px)`;
+  document.getElementById('mark').style.transform =
+    `translateY(-102px) scale(${1 + 0.05 * Math.sin(TAU * t / 4)})`;
+}
+</script>
+<script src="sound-engine.js"></script>
+<script src="audio.js"></script>
+</body>
+</html>

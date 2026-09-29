@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>ADONAI · 02 Kinetic Type</title>
+<style>
+  html,body{margin:0;height:100%;background:#07182D;overflow:hidden}
+  #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin-left:-960px;margin-top:-540px;transform-origin:center;background:#07182D}
+  .word{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;
+        font-family:'Manrope';font-weight:600;letter-spacing:-0.02em;letter-spacing:-0.015em;opacity:0;will-change:transform,opacity,filter;white-space:pre-line;text-align:center}
+  #final{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0}
+  #fword{position:relative;font:600 190px/1 'Manrope';color:#FFFFFF;letter-spacing:-0.02em}
+  .gl{position:absolute;inset:0}
+  #bar{width:0;height:10px;background:#31DDD4;margin-top:34px;border-radius:5px}
+  #fsub{margin-top:26px;font:500 24px 'Geist Mono';letter-spacing:.52em;text-indent:.52em;color:#31DDD4;opacity:0}
+  #grid{position:absolute;inset:0;opacity:.055;background-image:linear-gradient(rgba(49,221,212,.7) 1px,transparent 1px),linear-gradient(90deg,rgba(49,221,212,.7) 1px,transparent 1px);background-size:120px 120px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="grid"></div>
+  <div class="word" id="w0">SOFTWARE</div>
+  <div class="word" id="w1">SOB MEDIDA</div>
+  <div class="word" id="w2">APPS</div>
+  <div class="word" id="w3">PAGAMENTOS</div>
+  <div class="word" id="w4">INTELIGÊNCIA
+ARTIFICIAL</div>
+  <div id="final">
+    <div id="fword">ADONAI
+      <div class="gl" id="glR" style="color:rgba(255,80,80,.85)">ADONAI</div>
+      <div class="gl" id="glC" style="color:rgba(49,221,212,.9)">ADONAI</div>
+    </div>
+    <div id="bar"></div>
+    <div id="fsub">GENIUS SOLUTIONS</div>
+  </div>
+</div>
+<script src="motion-core.js"></script>
+<script>
+const { lerp, seg, outExpo, outQuart, inOutCubic, outBack, C } = ADN;
+const stage = document.getElementById('stage');
+ADN.fitStage(stage);
+const tc = ADN.hud(stage, 'MG/02 — KINETIC TYPE');
+DUR = window.DUR = 6;
+window.ADN_PIECE = '02-kinetic';
+
+const WORDS = [
+  { el: 'w0', color: '#FFFFFF', size: 168, t0: 0.0,  t1: 1.05 },
+  { el: 'w1', color: C.teal,  size: 168, t0: 1.05, t1: 2.0  },
+  { el: 'w2', color: '#FFFFFF', size: 190, t0: 2.0,  t1: 2.85 },
+  { el: 'w3', color: C.ink,   size: 152, t0: 2.85, t1: 3.7  },
+  { el: 'w4', color: '#FFFFFF', size: 118, t0: 3.7,  t1: 4.55 },
+];
+WORDS.forEach(w => { const e = document.getElementById(w.el); e.style.color = w.color; e.style.fontSize = w.size + 'px'; });
+
+function render(t) {
+  tc(t);
+  // palavras: slam in (scale 2.4→1 + skew) / lift out (blur + sobe)
+  for (const w of WORDS) {
+    const e = document.getElementById(w.el);
+    const pin = seg(t, w.t0, w.t0 + 0.32);
+    const pout = seg(t, w.t1 - 0.22, w.t1);
+    if (t < w.t0 - 0.02 || t > w.t1) { e.style.opacity = 0; continue; }
+    const ein = outQuart(pin);
+    const eout = inOutCubic(pout);
+    e.style.opacity = outExpo(pin) * (1 - eout);
+    const sc = lerp(2.4, 1, ein) * lerp(1, 0.96, eout);
+    const sk = lerp(-9, 0, ein);
+    e.style.transform = `scale(${sc}) skewX(${sk}deg) translateY(${lerp(0, -110, eout)}px)`;
+    e.style.filter = `blur(${lerp(6, 0, ein) + eout * 14}px)`;
+  }
+
+  // final: ADONAI com glitch
+  const f = document.getElementById('final');
+  const fin = seg(t, 4.55, 4.98);
+  const fout = seg(t, 5.55, 6);
+  f.style.opacity = outExpo(fin) * (1 - fout);
+  f.style.transform = `scale(${lerp(1.5, 1, outQuart(fin))})`;
+
+  const glitching = t > 4.62 && t < 5.02;
+  const R = document.getElementById('glR'), Cy = document.getElementById('glC');
+  if (glitching) {
+    const j = Math.floor(t * 28); // alterna " fatias" 30x/s
+    const off = (j % 2 ? 1 : -1) * (7 + (j % 3) * 6);
+    R.style.transform = `translateX(${off}px)`;
+    Cy.style.transform = `translateX(${-off}px)`;
+    R.style.clipPath = j % 3 ? 'inset(12% 0 55% 0)' : 'inset(58% 0 8% 0)';
+    Cy.style.clipPath = j % 3 ? 'inset(55% 0 10% 0)' : 'inset(10% 0 60% 0)';
+  } else {
+    R.style.opacity = 0; Cy.style.opacity = 0;
+  }
+
+  const bar = document.getElementById('bar');
+  bar.style.width = `${lerp(0, 340, outQuart(seg(t, 4.95, 5.35)))}px`;
+  document.getElementById('fsub').style.opacity = seg(t, 5.1, 5.45) * (1 - fout);
+}
+</script>
+<script src="sound-engine.js"></script>
+<script src="audio.js"></script>
+</body>
+</html>

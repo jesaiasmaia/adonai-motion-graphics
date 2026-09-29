@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Teste · Replicação de estilo — cinematic essay</title>
+<style>
+  @font-face{font-family:'Manrope';src:url('../fonts/Manrope-var.woff2') format('woff2-variations');font-weight:100 900;font-display:block}
+  @font-face{font-family:'Geist Mono';src:url('../fonts/GeistMono-var.woff2') format('woff2-variations');font-weight:100 900;font-display:block}
+  html,body{margin:0;height:100%;background:#0C0C0E;overflow:hidden}
+  #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin-left:-960px;margin-top:-540px;transform-origin:center;background:#0C0C0E}
+  #vig{position:absolute;inset:0;background:radial-gradient(1200px 800px at 42% 45%,rgba(30,30,34,.9) 0%,rgba(16,16,18,.96) 55%,#0A0A0C 100%)}
+
+  /* — ponto de luz (motivo condutor) — */
+  #light{position:absolute;width:0;height:0;will-change:transform}
+  #halo2{position:absolute;width:560px;height:560px;left:-280px;top:-280px;border-radius:50%;
+         background:radial-gradient(circle,rgba(232,150,61,.20) 0%,rgba(232,150,61,.07) 45%,transparent 70%);filter:blur(30px)}
+  #halo{position:absolute;width:300px;height:300px;left:-150px;top:-150px;border-radius:50%;
+        background:radial-gradient(circle,rgba(240,180,90,.42) 0%,rgba(232,150,61,.16) 45%,transparent 72%);filter:blur(8px)}
+  #core{position:absolute;width:16px;height:16px;left:-8px;top:-8px;border-radius:50%;
+        background:#FFF3DC;box-shadow:0 0 18px 6px rgba(255,220,160,.85),0 0 60px 24px rgba(240,170,80,.45)}
+
+  /* — tipografia — */
+  .kicker{position:absolute;left:150px;top:328px;font:600 20px 'Geist Mono';color:#E8A33D;letter-spacing:.42em;opacity:0;will-change:transform,opacity,filter}
+  #title{position:absolute;left:148px;top:372px;font:800 84px/1.06 'Manrope';color:#F0EFEA;letter-spacing:-0.015em;will-change:transform,opacity,filter}
+  #subtitle{position:absolute;left:150px;top:612px;font:400 19px 'Geist Mono';color:#6E6E72;letter-spacing:.34em;opacity:0}
+
+  /* — karaoke — */
+  .karo{position:absolute;width:660px;font:600 33px/1.5 'Manrope';letter-spacing:-0.005em}
+  #karoB{left:150px;top:560px}
+  #karoFirst{left:150px;top:630px;font-size:27px;width:600px;opacity:0}
+  #karoSecond{left:150px;top:730px;font-size:27px;width:600px;opacity:0}
+  #karoD{left:150px;top:838px;font-size:27px;width:600px;opacity:0}
+  .karo span{color:#4A4A4E;transition:none}
+  .karo span.now{color:#EDECE7}
+  .karo span.kw{font-weight:800;color:#F0EFEA}
+  .karo span.kw.gold{color:#E8A33D}
+  .karo span.lead{font-weight:800;color:#F0EFEA}
+
+  /* — eixos — */
+  #axes{position:absolute;left:0;top:0}
+  #axes line{stroke:#8A8A8E;stroke-width:1.5}
+  .axlab{position:absolute;font:500 11px 'Geist Mono';letter-spacing:.24em;color:#8A8A8E;opacity:0}
+  #axQ{left:1180px;top:818px;transform:translateX(-50%);font:500 13px 'Geist Mono';letter-spacing:.18em;color:#6E6E72;opacity:0}
+  #axVlab{left:1108px;top:540px;transform:translate(-50%,-50%) rotate(-90deg);transform-origin:center;white-space:nowrap}
+
+  /* — matriz 2×2 — */
+  .card{position:absolute;width:300px;height:132px;border-radius:10px;padding:20px 22px;opacity:0;will-change:transform,opacity}
+  .card .lab{font:500 10.5px 'Geist Mono';letter-spacing:.22em;opacity:.75;margin-bottom:12px}
+  .card .tt{font:700 25px/1.15 'Manrope';letter-spacing:-0.01em}
+
+  #fade{position:absolute;inset:0;background:#0C0C0E;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="vig"></div>
+  <div id="light"><div id="halo2"></div><div id="halo"></div><div id="core"></div></div>
+
+  <div class="kicker" id="kicker">MAESTRO DO USO DA IA</div>
+  <div id="title"><span id="t1" style="display:block">Como usar IA</span><span id="t2" style="display:block">de forma inteligente</span></div>
+  <div id="subtitle">CONHECIMENTO&nbsp;&nbsp;×&nbsp;&nbsp;CONSCIÊNCIA</div>
+
+  <div class="karo" id="karoB"></div>
+  <div class="karo" id="karoFirst"></div>
+  <div class="karo" id="karoSecond"></div>
+  <div class="karo" id="karoD"></div>
+
+  <svg id="axes" width="1920" height="1080">
+    <line id="axV" x1="1180" y1="290" x2="1180" y2="790" opacity="0"/>
+    <line id="axH" x1="830" y1="540" x2="1530" y2="540" opacity="0"/>
+  </svg>
+  <div class="axlab" id="axTop" style="left:1180px;top:252px;transform:translateX(-50%)">SEI</div>
+  <div class="axlab" id="axBot" style="left:1180px;top:800px;transform:translateX(-50%)">NÃO SEI</div>
+  <div class="axlab" id="axVlab">O QUE AINDA NÃO PERCEBO QUE NÃO SEI</div>
+  <div class="axlab" id="axL" style="left:760px;top:522px">NÃO PERCEBO</div>
+  <div class="axlab" id="axR" style="left:1476px;top:522px">PERCEBO</div>
+  <div id="axQ">Percebo o que sei e o que me falta?</div>
+
+  <div class="card" id="c0" style="left:872px;top:400px;background:rgba(198,123,78,.16);border:1.5px solid rgba(198,123,78,.55)">
+    <div class="lab" style="color:#D99A6C">DESCONHECIMENTO PASSIVO</div>
+    <div class="tt" style="color:#E4B28B">Não sei que sei</div>
+  </div>
+  <div class="card" id="c1" style="left:1188px;top:400px;background:rgba(47,125,90,.16);border:1.5px solid rgba(47,125,90,.55)">
+    <div class="lab" style="color:#5FA583">DOMÍNIO CONSCIENTE</div>
+    <div class="tt" style="color:#8FC4A6">Sei que sei</div>
+  </div>
+  <div class="card" id="c2" style="left:872px;top:564px;background:rgba(181,68,60,.16);border:1.5px solid rgba(181,68,60,.55)">
+    <div class="lab" style="color:#D07368">INVISÍVEL OPERACIONAL</div>
+    <div class="tt" style="color:#DE9088">Não sei que não sei</div>
+  </div>
+  <div class="card" id="c3" style="left:1188px;top:564px;background:rgba(60,110,159,.16);border:1.5px solid rgba(60,110,159,.55)">
+    <div class="lab" style="color:#6E9BC7">CONSCIÊNCIA TOTAL</div>
+    <div class="tt" style="color:#9CC0E2">Sei que não sei</div>
+  </div>
+
+  <div id="fade"></div>
+</div>
+
+<script>
+/* ------- boot determinístico (?t=segundos p/ render, senão rAF loop) ------- */
+DUR = window.DUR = 26;
+const stage = document.getElementById('stage');
+const fit = () => { const s = Math.min(innerWidth / 1920, innerHeight / 1080); stage.style.transform = `scale(${s})`; };
+addEventListener('resize', fit); fit();
+
+const { lerp, seg, outExpo, outQuart, inOutCubic, outBack, TAU } = {
+  lerp: (a, b, t) => a + (b - a) * t,
+  seg: (t, a, b) => Math.min(1, Math.max(0, (t - a) / (b - a))),
+  outExpo: t => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+  outQuart: t => 1 - Math.pow(1 - t, 4),
+  inOutCubic: t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+  outBack: (t, s = 1.4) => 1 + (s + 1) * Math.pow(t - 1, 3) + s * Math.pow(t - 1, 2),
+  TAU: Math.PI * 2,
+};
+
+/* ------- karaoke: frases com tokens e keywords ------- */
+function build(el, tokens, size) {
+  el.innerHTML = tokens.map(tk =>
+    `<span class="${tk.kw ? 'kw' : ''} ${tk.gold ? 'gold' : ''} ${tk.lead ? 'lead' : ''}">${tk.w}</span> `).join('');
+  return [...el.querySelectorAll('span')];
+}
+const B = build(document.getElementById('karoB'), [
+  { w: 'Antes' }, { w: 'de' }, { w: 'pedir' }, { w: 'qualquer', kw: 1 }, { w: 'coisa', kw: 1 },
+  { w: 'pra' }, { w: 'uma' }, { w: 'IA,', kw: 1, gold: 1 }, { w: 'responda' },
+  { w: 'duas', kw: 1 }, { w: 'perguntas', kw: 1 }, { w: 'sobre' }, { w: 'você.' },
+]);
+const F1 = build(document.getElementById('karoFirst'), [
+  { w: 'Primeira:', lead: 1 }, { w: 'eu' }, { w: 'sei', kw: 1 }, { w: 'alguma' }, { w: 'coisa', kw: 1 }, { w: 'sobre' }, { w: 'esse' }, { w: 'assunto?' },
+]);
+const F2 = build(document.getElementById('karoSecond'), [
+  { w: 'Segunda:', lead: 1 }, { w: 'eu' }, { w: 'percebo', kw: 1 }, { w: 'o' }, { w: 'que' }, { w: 'sei,' }, { w: 'e' }, { w: 'o' }, { w: 'que' }, { w: 'ainda', kw: 1 }, { w: 'me', kw: 1 }, { w: 'falta?', kw: 1 },
+]);
+const FD = build(document.getElementById('karoD'), [
+  { w: 'Cruzando' }, { w: 'as' }, { w: 'duas' }, { w: 'respostas,' }, { w: 'aparecem' }, { w: 'quatro', kw: 1 }, { w: 'situações.', kw: 1 },
+]);
+function karo(spans, t, t0, step) {
+  const n = Math.floor((t - t0) / step) + 1;
+  spans.forEach((s, i) => {
+    if (i >= n) { s.style.opacity = 0; return; }
+    s.style.opacity = 1;
+    s.className = s.className.replace(/\s*now/g, '') + (i === n - 1 ? ' now' : '');
+  });
+  return Math.min(1, (t - t0) / ((spans.length - 1) * step));
+}
+
+/* ------- cena ------- */
+const el = id => document.getElementById(id);
+const light = el('light');
+
+function render(t) {
+  /* — luz: posição por cena + pulso — */
+  const pA = [1230, 432], pB = [1382, 497], pC = [1180, 540];
+  let P;
+  if (t < 5.5) P = pA;
+  else if (t < 12) P = pB;
+  else P = pC;
+  let lx = P[0], ly = P[1];
+  if (t >= 5.5 && t < 12) { const e = t; lx = pA[0] + (pB[0] - pA[0]) * Math.min(1, seg(e, 5.5, 8)); ly = pA[1] + (pB[1] - pA[1]) * Math.min(1, seg(e, 5.5, 8)); }
+  if (t >= 12 && t < 13.4) { const e = inOutCubic(seg(t, 12, 13.4)); lx = lerp(pB[0], pC[0], e); ly = lerp(pB[1], pC[1], e); }
+  const pulse = t >= 23.2 ? 1.9 : 1; // pulso forte no final
+  const sc = 1 + 0.07 * Math.sin(TAU * t * 0.55) * pulse + 0.35 * Math.sin(Math.PI * seg(t, 23.2, 24.4));
+  light.style.transform = `translate(${lx + Math.sin(t * 0.6) * 6}px,${ly + Math.cos(t * 0.5) * 6}px) scale(${sc})`;
+  light.style.opacity = 0.85 + 0.15 * Math.sin(TAU * t * 0.55 + 1.2);
+
+  /* — cena A: abertura — */
+  const aOut = seg(t, 5.0, 5.5);
+  const kick = el('kicker');
+  const ke = outExpo(seg(t, 0.6, 1.35));
+  kick.style.opacity = ke * (1 - aOut);
+  kick.style.letterSpacing = `${lerp(0.55, 0.42, ke)}em`;
+  kick.style.transform = `translateY(${lerp(10, 0, ke)}px)`;
+  [['t1', 1.1], ['t2', 1.28]].forEach(([id, t0]) => {
+    const e = outExpo(seg(t, t0, t0 + 1.25));
+    const s = el(id);
+    s.style.opacity = e * (1 - aOut);
+    s.style.filter = `blur(${lerp(14, 0, e) + aOut * 12}px)`;
+    s.style.transform = `translateY(${lerp(26, 0, e) - aOut * 16}px)`;
+  });
+  const se = outExpo(seg(t, 2.7, 3.35));
+  el('subtitle').style.opacity = se * (1 - aOut);
+  el('subtitle').style.letterSpacing = `${lerp(0.42, 0.34, se)}em`;
+
+  /* — cena B: karaoke principal — */
+  const kB = el('karoB');
+  kB.style.opacity = t < 11.9 ? 1 : Math.max(0, 1 - seg(t, 11.9, 12.4) * 0.55); // fica fantasma
+  kB.style.transform = `translateY(${t < 12 ? 0 : -inOutCubic(seg(t, 12, 12.7)) * 260}px)`;
+  kB.style.filter = t >= 12 ? `brightness(${1 - seg(t, 12, 12.7) * 0.35})` : 'none';
+  karo(B, t, 6.0, 0.33);
+
+  /* — cena C: eixos — */
+  const vE = outQuart(seg(t, 12.2, 13.0));
+  const axV = el('axV');
+  axV.setAttribute('opacity', vE * 0.8);
+  axV.setAttribute('transform', `translate(1180 540) scale(1 ${vE}) translate(-1180 -540)`);
+  const hE = outQuart(seg(t, 13.4, 14.2));
+  const axH = el('axH');
+  axH.setAttribute('opacity', hE * 0.8);
+  axH.setAttribute('transform', `translate(1180 540) scale(${hE} 1) translate(-1180 -540)`);
+  const labV = seg(t, 12.6, 13.2), labH = seg(t, 14.0, 14.6);
+  [['axTop', labV], ['axBot', labV], ['axVlab', labV], ['axL', labH], ['axR', labH]].forEach(([id, p]) => {
+    el(id).style.opacity = p * 0.9;
+  });
+  el('axQ').style.opacity = seg(t, 14.6, 15.2) * 0.85;
+
+  /* — "Primeira"/"Segunda" — */
+  const kF = el('karoFirst'), kS = el('karoSecond');
+  kF.style.opacity = seg(t, 12.3, 12.7);
+  kS.style.opacity = seg(t, 14.3, 14.7);
+  karo(F1, t, 12.4, 0.2);
+  karo(F2, t, 14.4, 0.2);
+
+  /* — cena D: matriz — */
+  const cards = ['c0', 'c1', 'c2', 'c3'];
+  cards.forEach((id, i) => {
+    const c = el(id);
+    const e = seg(t, 20.0 + i * 0.14, 20.5 + i * 0.14);
+    c.style.opacity = outExpo(e);
+    c.style.transform = `scale(${lerp(0.9, 1, outBack(e))}) translateY(${lerp(14, 0, outExpo(e))}px)`;
+  });
+  const kD = el('karoD');
+  kD.style.opacity = seg(t, 21.1, 21.5) * (1 - seg(t, 24.6, 25.2));
+  karo(FD, t, 21.2, 0.24);
+
+  /* — fade final — */
+  el('fade').style.opacity = seg(t, 24.8, 26);
+}
+
+/* boot */
+const q = new URLSearchParams(location.search);
+if (q.has('t')) {
+  document.fonts.ready.then(() => {
+    window.__seek = tt => render(tt);
+    window.__seek(parseFloat(q.get('t')) || 0);
+    window.__ready = true;
+  });
+} else {
+  document.fonts.ready.then(() => {
+    let start = performance.now();
+    window.__resyncClock = () => { start = performance.now(); };
+    (function loop(now) {
+      render(((now - start) / 1000) % DUR);
+      requestAnimationFrame(loop);
+    })(start);
+  });
+}
+</script>
+<script src="../sound-engine.js"></script>
+<script>window.ADN_PIECE = 'test-opus';</script>
+<script src="../audio.js"></script>
+</body>
+</html>
